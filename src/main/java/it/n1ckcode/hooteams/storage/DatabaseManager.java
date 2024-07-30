@@ -18,7 +18,7 @@ public class DatabaseManager {
 
     public void connect() {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://" + HooTeams.getFileManager().getConfig().getString("database.host" + ":" + HooTeams.getFileManager().getConfig().getString("database.port")) + "/" + HooTeams.getFileManager().getConfig().getString("database.name"));
+        config.setJdbcUrl("jdbc:mysql://" + HooTeams.getFileManager().getConfig().getString("database.host") + ":" + HooTeams.getFileManager().getConfig().getString("database.port") + "/" + HooTeams.getFileManager().getConfig().getString("database.name"));
         config.setUsername(HooTeams.getFileManager().getConfig().getString("database.username"));
         config.setPassword(HooTeams.getFileManager().getConfig().getString("database.password"));
         config.addDataSourceProperty("cachePrepStmts", "true");
