@@ -1,0 +1,13 @@
+name: HooTeams
+version: '${version}'
+main: it.n1ckcode.hooteams.HooTeams
+api-version: '1.20'
+authors: [N1ckCode]
+description: Enhanced Teams plugin
+commands:
+  hooteams:
+
+  team:
+    aliases:
+      - clan
+      - gang
