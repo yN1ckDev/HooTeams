@@ -1,0 +1,1 @@
+This is a plugin for teams that I am developing and that I continue every now and then whenever I want, if it is ever completed you will be free to fork it. If you leave me the credits I'll give you a kiss
