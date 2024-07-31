@@ -4,17 +4,14 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import it.n1ckcode.hooteams.HooTeams;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.logging.Logger;
 
 public class DatabaseManager {
 
-    private HikariDataSource dataSource;
+    private static HikariDataSource dataSource;
 
     public void connect() {
         HikariConfig config = new HikariConfig();
@@ -34,12 +31,14 @@ public class DatabaseManager {
     }
 
     private void createTables() {
-        String createClansTable = "CREATE TABLE IF NOT EXISTS teams ("
-                + "id INT AUTO_INCREMENT PRIMARY KEY, "
-                + "creator VARCHAR(255) NOT NULL, "
-                + "name VARCHAR(255) NOT NULL, "
-                + "moderators TEXT NOT NULL"
-                + ");";
+        String createClansTable = "CREATE TABLE IF NOT EXISTS clans (" +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                "creator VARCHAR(36) NOT NULL, " +
+                "name VARCHAR(50) NOT NULL, " +
+                "moderators TEXT, " +
+                "members TEXT, " +
+                "UNIQUE KEY (creator)" +
+                ");";
 
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
@@ -77,10 +76,56 @@ public class DatabaseManager {
         }
     }
 
+    public boolean canCreateClan(Player player) {
+        try (Connection connection = DatabaseManager.getConnection()) {
+            String sql = "SELECT COUNT(*) AS count FROM clans WHERE creator = ?";
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, player.getUniqueId().toString());
+                ResultSet resultSet = statement.executeQuery();
+                if (resultSet.next()) {
+                    return resultSet.getInt("count") == 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean disbandClan(String creatorUUID) {
+        String sql = "DELETE FROM clans WHERE creator = ?";
+        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, creatorUUID);
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean hasClan(String playerUUID) {
+        String sql = "SELECT 1 FROM clans WHERE creator = ? OR FIND_IN_SET(?, members) > 0";
+        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, playerUUID);
+            statement.setString(2, playerUUID);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public void closeConnection() {
         if (dataSource != null && !dataSource.isClosed()) {
             dataSource.close();
             Bukkit.getLogger().info("[Connection] Connection to database closed.");
         }
     }
+
+    public static Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
+    }
+
 }
