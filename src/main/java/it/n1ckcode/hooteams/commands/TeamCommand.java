@@ -22,6 +22,9 @@ public class TeamCommand extends AbstractCommand {
         if(args.length == 0) {
            player.sendMessage(CC.colorize("&cSyntax error: /team create <name>"));
         } else if (args[0].equalsIgnoreCase("create")) {
+            if(!databaseManager.canCreateClan(player)) {
+                player.sendMessage(CC.getFormattedText("errors.cannot-create-team"));
+            }
             if (args.length == 3) {
                 String name = args[1];
                 databaseManager.createClan(player.getName(), name);
@@ -37,6 +40,18 @@ public class TeamCommand extends AbstractCommand {
                 player.sendMessage(CC.getFormattedText("teams.renamed"));
             } else {
                 player.sendMessage(CC.colorize("&cSyntax error: /team rename <old-name> <new-name>"));
+            }
+
+        } else if (args[0].equalsIgnoreCase("disband")) {
+            if(!databaseManager.hasClan(String.valueOf(player))) {
+                player.sendMessage(CC.getFormattedText("errors.cannot-disband-team"));
+            }
+            if (args.length == 2) {
+                String name = args[1];
+                databaseManager.disbandClan(name);
+                player.sendMessage(CC.getFormattedText("teams.deleted"));
+            } else {
+                player.sendMessage(CC.colorize("&cSyntax error: /team delete <name>"));
             }
 
         }
